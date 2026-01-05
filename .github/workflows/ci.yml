@@ -7,22 +7,22 @@ on:
     branches: ["main"]
 
 jobs:
-  test:
+  docker-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
         with:
-          python-version: "3.11"
+          context: .
+          load: true
+          tags: gha-lab:ci
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run tests
-        run: pytest -q
+      - name: Run tests in container
+        run: docker run --rm gha-lab:ci pytest -q
